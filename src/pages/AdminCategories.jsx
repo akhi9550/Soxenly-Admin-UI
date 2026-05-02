@@ -79,7 +79,7 @@ export default function AdminCategories() {
 
       const data = await response.json();
       if (response.ok) {
-        const categoryId = data.data.id;
+        const categoryId = data.data.id || data.data.ID;
         
         // 2. Upload Image if exists
         if (newImage) {
@@ -126,7 +126,7 @@ export default function AdminCategories() {
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({ 
-          id: editingCategory.id,
+          id: editingCategory.id || editingCategory.ID,
           category: editValue,
           image: editingCategory.image // keep old image unless changed
         })
@@ -137,7 +137,8 @@ export default function AdminCategories() {
         if (editImage) {
           const formData = new FormData();
           formData.append("image", editImage);
-          await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/category/upload-image?id=${editingCategory.id}`, {
+          const editId = editingCategory.id || editingCategory.ID;
+          await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/category/upload-image?id=${editId}`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${token}`
@@ -163,7 +164,8 @@ export default function AdminCategories() {
     if (!deletingCategory) return;
     const token = localStorage.getItem("admin_token");
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/category?id=${deletingCategory.id}`, {
+      const delId = deletingCategory.id || deletingCategory.ID;
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/category?id=${delId}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -374,7 +376,7 @@ export default function AdminCategories() {
                           Edit
                         </button>
                         <button 
-                          onClick={() => setDeletingCategory({ id: category.id, name: catName })}
+                          onClick={() => setDeletingCategory({ id: catId, name: catName })}
                           className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider border border-red-100 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300"
                         >
                           Delete

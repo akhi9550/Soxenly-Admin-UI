@@ -6,6 +6,7 @@ export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
   const { showNotification } = useNotification();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   // Add category state
   const [showAdd, setShowAdd] = useState(false);
@@ -44,14 +45,14 @@ export default function AdminCategories() {
       if (response.ok) {
         setCategories(data.data || []);
       } else {
-        setError(data.message || "Failed to load categories");
+        showNotification(data.message || "Failed to load categories", "error");
         if (response.status === 401) {
           localStorage.removeItem("admin_token");
           navigate("/login");
         }
       }
     } catch (err) {
-      setError("Network error");
+      showNotification("Network error", "error");
     } finally {
       setLoading(false);
     }
@@ -102,7 +103,6 @@ export default function AdminCategories() {
         showNotification("Category added successfully!");
         fetchCategories();
       } else {
-        const data = await response.json();
         showNotification(data.message || "Failed to add category", "error");
       }
     } catch (err) {
@@ -136,6 +136,7 @@ export default function AdminCategories() {
         })
       });
 
+      const data = await response.json();
       if (response.ok) {
         // 2. Upload New Image if changed
         if (editImage) {

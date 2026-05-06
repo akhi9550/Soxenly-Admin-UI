@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../context/NotificationContext";
 
 const COMMON_SIZES = ["S", "M", "L", "XL", "XXL", "Free Size"];
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [error, setError] = useState("");
+  const { showNotification } = useNotification();
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ export default function AdminProducts() {
   const [editLoading, setEditLoading] = useState(false);
 
   const [deletingProduct, setDeletingProduct] = useState(null);
+  const [zoomImage, setZoomImage] = useState(null);
 
   const [newProductImage, setNewProductImage] = useState(null);
   const [imagesToDelete, setImagesToDelete] = useState([]); // Array of URLs to delete on Save
@@ -132,13 +134,13 @@ export default function AdminProducts() {
         setNewProductVariants([{ size: "", stock: "" }]);
         setNewProductImages([]);
         setShowAdd(false);
-        fetchProducts();
+        showNotification("Product added successfully!");
       } else {
         const data = await response.json();
-        alert(data.message || "Failed to add product");
+        showNotification(data.message || "Failed to add product", "error");
       }
     } catch (err) {
-      alert("Network error while adding product.");
+      showNotification("Network error while adding product.", "error");
     } finally {
       setAddLoading(false);
     }
@@ -238,6 +240,21 @@ export default function AdminProducts() {
 
   return (
     <>
+      {/* IMAGE LIGHTBOX OVERLAY */}
+      {zoomImage && (
+        <div 
+          className="fixed inset-0 bg-neutral-950/80 backdrop-blur-2xl z-[200] flex items-center justify-center p-4 lg:p-12 animate-in fade-in duration-500 cursor-zoom-out"
+          onClick={() => setZoomImage(null)}
+        >
+          <div className="relative w-full h-full flex items-center justify-center animate-in zoom-in-90 duration-500 ease-out">
+            <img 
+              src={zoomImage} 
+              alt="Immersive view" 
+              className="max-w-full max-h-full object-contain shadow-[0_0_80px_rgba(0,0,0,0.4)]"
+            />
+          </div>
+        </div>
+      )}
       {/* DELETE MODAL OVERLAY */}
       {deletingProduct && (
         <div className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
@@ -280,7 +297,7 @@ export default function AdminProducts() {
                 {(editingProduct.images || []).map((img, idx) => (
                   <div key={idx} className="relative group">
                     <img 
-                      src={`${import.meta.env.VITE_API_BASE_URL}${img}`} 
+                      src={img.startsWith("http") ? img : `${import.meta.env.VITE_API_BASE_URL}${img}`} 
                       alt="Product" 
                       className="w-20 h-20 object-cover border border-neutral-200 rounded-lg"
                     />
@@ -315,7 +332,7 @@ export default function AdminProducts() {
                   <label className="text-[10px] font-medium text-sm block mb-1">Category</label>
                   <select required value={editValues.category_id} onChange={e => setEditValues({...editValues, category_id: e.target.value})} className="w-full border border-neutral-200 rounded-lg p-2 text-sm focus:outline-none focus:border-soxenly-beige focus:ring-1 focus:ring-black transition-all">
                     {categories.map(c => (
-                      <option key={c.id || c.Id} value={c.id || c.Id}>{c.category_name || c.Category_Name || c.category || c.name}</option>
+                      <option key={c.id || c.Id || c.ID} value={c.id || c.Id || c.ID}>{c.category_name || c.Category_Name || c.category || c.name}</option>
                     ))}
                   </select>
                 </div>
@@ -435,54 +452,60 @@ export default function AdminProducts() {
           <h2 className="text-sm font-medium tracking-[0.2em] text-neutral-500 mb-1">Inventory Management</h2>
           <h1 className="font-serif text-4xl lg:text-5xl text-soxenly-green">Products</h1>
         </div>
-        <div className="flex space-x-2">
-          <button 
-            disabled={page === 1}
-            onClick={() => setPage(p => p - 1)}
-            className="px-4 py-2 bg-white border border-soxenly-beige font-medium text-sm text-xs hover:bg-soxenly-green hover:text-soxenly-cream disabled:opacity-50"
-          >
-            Prev
-          </button>
-          <button 
-            onClick={() => setPage(p => p + 1)}
-            className="px-4 py-2 bg-white border border-soxenly-beige font-medium text-sm text-xs hover:bg-soxenly-green hover:text-soxenly-cream"
-          >
-            Next
-          </button>
+        <div className="flex items-center gap-3">
+          <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 bg-neutral-50 px-4 py-2 rounded-full border border-neutral-100">
+            Page {page}
+          </div>
+          <div className="flex bg-white rounded-full border border-soxenly-beige p-1 shadow-sm">
+            <button 
+              disabled={page === 1}
+              onClick={() => setPage(p => p - 1)}
+              className="p-2 rounded-full hover:bg-soxenly-green hover:text-soxenly-cream transition-all duration-300 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit"
+              title="Previous Page"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path>
+              </svg>
+            </button>
+            <button 
+              onClick={() => setPage(p => p + 1)}
+              className="p-2 rounded-full hover:bg-soxenly-green hover:text-soxenly-cream transition-all duration-300"
+              title="Next Page"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
+              </svg>
+            </button>
+          </div>
           <button 
             onClick={() => setShowAdd(!showAdd)}
-            className="px-6 py-2 bg-soxenly-green text-soxenly-cream border border-soxenly-green font-bold text-[10px] uppercase tracking-wider hover:bg-white hover:text-soxenly-green transition-all duration-300"
+            className="ml-2 px-6 py-2 bg-soxenly-green text-soxenly-cream border border-soxenly-green font-bold text-[10px] uppercase tracking-wider rounded-full hover:bg-white hover:text-soxenly-green transition-all duration-300 shadow-lg shadow-soxenly-green/10"
           >
-            {showAdd ? "Cancel" : "+ Add New"}
+            {showAdd ? "Cancel" : "+ Add Product"}
           </button>
         </div>
       </header>
 
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 text-red-600 font-bold text-xs border border-red-100 rounded-xl">
-          ERROR: {error}
-        </div>
-      )}
 
       {showAdd && (
         <div className="mb-8 p-6 bg-white border border-neutral-200 rounded-2xl max-h-[80vh] overflow-y-auto scrollbar-hide">
           <h3 className="text-xs font-medium tracking-[0.2em] mb-4">Add New Product</h3>
           <form onSubmit={handleAddProduct} className="grid grid-cols-2 gap-4">
             <div className="col-span-2 md:col-span-1">
-              <label className="text-[10px] font-medium text-sm mb-1 block">Product Name</label>
+              <label className="text-[10px] font-medium text-sm mb-1 block">Product Name <span className="text-red-500">*</span></label>
               <input type="text" required value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} className="w-full border border-neutral-200 rounded-lg p-2 text-sm focus:outline-none focus:border-soxenly-beige focus:ring-1 focus:ring-black transition-all" />
             </div>
             <div className="col-span-2 md:col-span-1">
-              <label className="text-[10px] font-medium text-sm mb-1 block">Category</label>
+              <label className="text-[10px] font-medium text-sm mb-1 block">Category <span className="text-red-500">*</span></label>
               <select required value={newProduct.category_id} onChange={e => setNewProduct({...newProduct, category_id: e.target.value})} className="w-full border border-neutral-200 rounded-lg p-2 text-sm focus:outline-none focus:border-soxenly-beige focus:ring-1 focus:ring-black transition-all">
                 <option value="">Select Category...</option>
                 {categories.map(c => (
-                  <option key={c.id || c.Id} value={c.id || c.Id}>{c.category_name || c.Category_Name || c.category || c.name}</option>
+                  <option key={c.id || c.Id || c.ID} value={c.id || c.Id || c.ID}>{c.category_name || c.Category_Name || c.category || c.name}</option>
                 ))}
               </select>
             </div>
             <div className="col-span-2 md:col-span-1">
-              <label className="text-[10px] font-medium text-sm mb-1 block">Price (₹)</label>
+              <label className="text-[10px] font-medium text-sm mb-1 block">Price (₹) <span className="text-red-500">*</span></label>
               <input type="number" step="0.01" required value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} className="w-full border border-soxenly-beige p-2 text-sm focus:outline-none" />
             </div>
             <div className="col-span-2 md:col-span-1">
@@ -509,7 +532,7 @@ export default function AdminProducts() {
               )}
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] font-medium text-sm mb-1 block">Description</label>
+              <label className="text-[10px] font-medium text-sm mb-1 block">Description <span className="text-red-500">*</span></label>
               <textarea value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} className="w-full border border-soxenly-beige p-2 text-sm focus:outline-none h-16" />
             </div>
 
@@ -599,8 +622,7 @@ export default function AdminProducts() {
           <table className="w-full min-w-[1000px] text-left border-collapse">
             <thead>
               <tr className="bg-soxenly-green text-soxenly-cream text-xs uppercase tracking-[0.1em]">
-                <th className="p-4 border-b border-soxenly-beige">ID</th>
-                <th className="p-4 border-b border-soxenly-beige border-l border-white">Name</th>
+                <th className="p-4 border-b border-soxenly-beige">Name</th>
                 <th className="p-4 border-b border-soxenly-beige border-l border-white">Description</th>
                 <th className="p-4 border-b border-soxenly-beige border-l border-white">Category</th>
                 <th className="p-4 border-b border-soxenly-beige border-l border-white">Price</th>
@@ -612,21 +634,20 @@ export default function AdminProducts() {
             <tbody className="text-sm">
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="p-8 text-center uppercase tracking-widest font-bold animate-pulse">
+                  <td colSpan="7" className="p-8 text-center uppercase tracking-widest font-bold animate-pulse">
                     Loading products...
                   </td>
                 </tr>
               ) : products.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="p-8 text-center uppercase tracking-widest font-bold">
+                  <td colSpan="7" className="p-8 text-center uppercase tracking-widest font-bold">
                     No products found.
                   </td>
                 </tr>
               ) : (
                 products.map((product) => (
                   <tr key={product.id || product.Id} className="border-b border-soxenly-beige hover:bg-neutral-100 transition-colors">
-                    <td className="p-4 text-sm text-neutral-600">{product.id || product.Id}</td>
-                    <td className="p-4 border-l border-soxenly-beige text-sm text-neutral-600">{product.name || product.Name}</td>
+                    <td className="p-4 text-sm text-neutral-600">{product.name || product.Name}</td>
                     <td className="p-4 border-l border-soxenly-beige text-xs text-neutral-500">{product.description || product.Description}</td>
                     <td className="p-4 border-l border-soxenly-beige text-sm text-neutral-600 capitalize">{product.category_name || "Unknown"}</td>
                     <td className="p-4 border-l border-soxenly-beige text-sm text-neutral-600">₹{product.price || product.Price}</td>
@@ -643,19 +664,24 @@ export default function AdminProducts() {
                         )}
                       </div>
                     </td>
-                    <td className="p-4 border-l border-soxenly-beige">
-                      {product.image && product.image.length > 0 ? (
-                        <img 
-                          src={`${import.meta.env.VITE_API_BASE_URL}${product.image[0]}`} 
-                          alt={product.name} 
-                          className="w-12 h-12 object-cover border border-neutral-200 rounded-md"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 bg-neutral-200 border border-soxenly-beige flex items-center justify-center text-[10px] font-bold text-neutral-400">
-                          NO IMG
-                        </div>
-                      )}
-                    </td>
+                      <td className="p-4 border-l border-soxenly-beige">
+                        {product.image && product.image.length > 0 ? (
+                          <div 
+                            className="w-12 h-12 bg-neutral-100 border border-neutral-200 rounded-md overflow-hidden cursor-zoom-in group"
+                            onClick={() => setZoomImage(product.image[0].startsWith("http") ? product.image[0] : `${import.meta.env.VITE_API_BASE_URL}${product.image[0]}`)}
+                          >
+                            <img 
+                              src={product.image[0].startsWith("http") ? product.image[0] : `${import.meta.env.VITE_API_BASE_URL}${product.image[0]}`} 
+                              alt={product.name} 
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 bg-neutral-200 border border-soxenly-beige flex items-center justify-center text-[10px] font-bold text-neutral-400">
+                            NO IMG
+                          </div>
+                        )}
+                      </td>
                     <td className="p-4 border-l border-soxenly-beige space-x-2">
                       <button 
                         onClick={() => {

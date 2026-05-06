@@ -7,11 +7,13 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminProducts from "./pages/AdminProducts";
 import AdminCategories from "./pages/AdminCategories";
 import AdminOrders from "./pages/AdminOrders";
-import AdminBanners from "./pages/AdminBanners";
+
+import { NotificationProvider } from "./context/NotificationContext";
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <NotificationProvider>
+      <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<AdminLogin />} />
@@ -22,9 +24,9 @@ export default function App() {
           <Route path="/products" element={<AdminProducts />} />
           <Route path="/categories" element={<AdminCategories />} />
           <Route path="/orders" element={<AdminOrders />} />
-          <Route path="/banners" element={<AdminBanners />} />
         </Route>
       </Routes>
     </BrowserRouter>
+    </NotificationProvider>
   );
 }

@@ -133,20 +133,32 @@ export default function AdminUsers() {
           <h2 className="text-sm font-medium tracking-[0.2em] text-neutral-500 mb-1">User Management</h2>
           <h1 className="font-serif text-4xl lg:text-5xl text-soxenly-green">Directory</h1>
         </div>
-        <div className="flex space-x-2">
-          <button 
-            disabled={page === 1}
-            onClick={() => setPage(p => p - 1)}
-            className="px-4 py-2 bg-white border border-soxenly-beige font-medium text-sm text-xs hover:bg-soxenly-green hover:text-soxenly-cream disabled:opacity-50"
-          >
-            Prev
-          </button>
-          <button 
-            onClick={() => setPage(p => p + 1)}
-            className="px-4 py-2 bg-white border border-soxenly-beige font-medium text-sm text-xs hover:bg-soxenly-green hover:text-soxenly-cream"
-          >
-            Next
-          </button>
+        <div className="flex items-center gap-3">
+          <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 bg-neutral-50 px-4 py-2 rounded-full border border-neutral-100">
+            Page {page}
+          </div>
+          <div className="flex bg-white rounded-full border border-soxenly-beige p-1 shadow-sm">
+            <button 
+              disabled={page === 1}
+              onClick={() => setPage(p => p - 1)}
+              className="p-2 rounded-full hover:bg-soxenly-green hover:text-soxenly-cream transition-all duration-300 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit"
+              title="Previous Page"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path>
+              </svg>
+            </button>
+            <button 
+              onClick={() => setPage(p => p + 1)}
+              disabled={users.length < 10}
+              className="p-2 rounded-full hover:bg-soxenly-green hover:text-soxenly-cream transition-all duration-300 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit"
+              title="Next Page"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
+              </svg>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -162,8 +174,7 @@ export default function AdminUsers() {
           <table className="w-full min-w-[1000px] text-left border-collapse">
             <thead>
               <tr className="bg-soxenly-green text-soxenly-cream text-xs uppercase tracking-[0.1em]">
-                <th className="p-4 border-b border-soxenly-beige">ID</th>
-                <th className="p-4 border-b border-soxenly-beige border-l border-white">Name</th>
+                <th className="p-4 border-b border-soxenly-beige">Name</th>
                 <th className="p-4 border-b border-soxenly-beige border-l border-white">Email</th>
                 <th className="p-4 border-b border-soxenly-beige border-l border-white">Phone</th>
                 <th className="p-4 border-b border-soxenly-beige border-l border-white">Status</th>
@@ -173,21 +184,20 @@ export default function AdminUsers() {
             <tbody className="text-sm">
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="p-8 text-center uppercase tracking-widest font-bold animate-pulse">
+                  <td colSpan="5" className="p-8 text-center uppercase tracking-widest font-bold animate-pulse">
                     Loading users...
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="p-8 text-center uppercase tracking-widest font-bold">
+                  <td colSpan="5" className="p-8 text-center uppercase tracking-widest font-bold">
                     No users found.
                   </td>
                 </tr>
               ) : (
                 users.map((user) => (
                   <tr key={user.id} className="border-b border-soxenly-beige hover:bg-neutral-100 transition-colors">
-                    <td className="p-4 text-sm text-neutral-600">{user.id}</td>
-                    <td className="p-4 border-l border-soxenly-beige">{user.firstname} {user.lastname}</td>
+                    <td className="p-4">{user.firstname} {user.lastname}</td>
                     <td className="p-4 border-l border-soxenly-beige">{user.email}</td>
                     <td className="p-4 border-l border-soxenly-beige">{user.phone}</td>
                     <td className="p-4 border-l border-soxenly-beige">

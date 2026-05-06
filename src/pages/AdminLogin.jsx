@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../context/NotificationContext";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const { showNotification } = useNotification();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
@@ -28,12 +28,13 @@ export default function AdminLogin() {
       if (response.ok) {
         localStorage.setItem("admin_token", data.data.Token);
         localStorage.setItem("admin_user", JSON.stringify(data.data.Admin));
+        showNotification("Welcome back, Administrator");
         navigate("/dashboard");
       } else {
-        setError(data.message || "Invalid admin credentials");
+        showNotification(data.message || "Invalid admin credentials", "error");
       }
     } catch (err) {
-      setError("Network error. Please try again.");
+      showNotification("Network error. Please try again.", "error");
     } finally {
       setLoading(false);
     }
@@ -47,11 +48,6 @@ export default function AdminLogin() {
           <span className="text-[10px] font-medium tracking-[0.2em] bg-soxenly-green text-soxenly-cream px-2 py-1">Admin</span>
         </div>
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 text-red-600 font-bold text-xs border border-red-100 rounded-xl">
-            ERROR: {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

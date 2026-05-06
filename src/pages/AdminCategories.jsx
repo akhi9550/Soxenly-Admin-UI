@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../context/NotificationContext";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
-  const [error, setError] = useState("");
+  const { showNotification } = useNotification();
   const [loading, setLoading] = useState(true);
   
   // Add category state
@@ -19,6 +20,7 @@ export default function AdminCategories() {
   const [editLoading, setEditLoading] = useState(false);
 
   const [deletingCategory, setDeletingCategory] = useState(null);
+  const [zoomImage, setZoomImage] = useState(null);
 
   const navigate = useNavigate();
 
@@ -97,12 +99,14 @@ export default function AdminCategories() {
         setNewCategory("");
         setNewImage(null);
         setShowAdd(false);
+        showNotification("Category added successfully!");
         fetchCategories();
       } else {
-        alert(data.message || "Failed to add category");
+        const data = await response.json();
+        showNotification(data.message || "Failed to add category", "error");
       }
     } catch (err) {
-      alert("Network error while adding category.");
+      showNotification("Network error while adding category.", "error");
     } finally {
       setAddLoading(false);
     }
@@ -150,11 +154,10 @@ export default function AdminCategories() {
         setEditImage(null);
         fetchCategories();
       } else {
-        const data = await response.json();
-        alert(data.message || "Failed to update category");
+        showNotification(data.message || "Failed to update category", "error");
       }
     } catch (err) {
-      alert("Network error");
+      showNotification("Network error", "error");
     } finally {
       setEditLoading(false);
     }
@@ -174,15 +177,30 @@ export default function AdminCategories() {
         fetchCategories();
       } else {
         const data = await response.json();
-        alert(data.message || "Failed to delete category");
+        showNotification(data.message || "Failed to delete category", "error");
       }
     } catch (err) {
-      alert("Network error");
+      showNotification("Network error", "error");
     }
   };
 
   return (
     <>
+      {/* IMAGE LIGHTBOX OVERLAY */}
+      {zoomImage && (
+        <div 
+          className="fixed inset-0 bg-neutral-950/80 backdrop-blur-2xl z-[200] flex items-center justify-center p-4 lg:p-12 animate-in fade-in duration-500 cursor-zoom-out"
+          onClick={() => setZoomImage(null)}
+        >
+          <div className="relative w-full h-full flex items-center justify-center animate-in zoom-in-90 duration-500 ease-out">
+            <img 
+              src={zoomImage} 
+              alt="Immersive view" 
+              className="max-w-full max-h-full object-contain shadow-[0_0_80px_rgba(0,0,0,0.4)]"
+            />
+          </div>
+        </div>
+      )}
       {/* DELETE MODAL OVERLAY */}
       {deletingCategory && (
         <div className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
@@ -224,7 +242,7 @@ export default function AdminCategories() {
             
             <form onSubmit={handleSaveEdit} className="space-y-6">
               <div>
-                <label className="text-xs uppercase tracking-[0.2em] font-bold block mb-2">New Name</label>
+                <label className="text-xs uppercase tracking-[0.2em] font-bold block mb-2">New Name <span className="text-red-500">*</span></label>
                 <input 
                   type="text"
                   required
@@ -279,11 +297,6 @@ export default function AdminCategories() {
         </button>
       </header>
 
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 text-red-600 font-bold text-xs border border-red-100 rounded-xl">
-          ERROR: {error}
-        </div>
-      )}
 
       {showAdd && (
         <div className="mb-8 p-6 bg-white border border-neutral-200 rounded-lg">
@@ -323,8 +336,7 @@ export default function AdminCategories() {
           <table className="w-full min-w-[1000px] text-left border-collapse">
             <thead>
               <tr className="bg-soxenly-green text-soxenly-cream text-xs uppercase tracking-[0.1em]">
-                <th className="p-4 border-b border-soxenly-beige">ID</th>
-                <th className="p-4 border-b border-soxenly-beige border-l border-white">Category Name</th>
+                <th className="p-4 border-b border-soxenly-beige">Category Name</th>
                 <th className="p-4 border-b border-soxenly-beige border-l border-white">Preview</th>
                 <th className="p-4 border-b border-soxenly-beige border-l border-white">Actions</th>
               </tr>
@@ -332,13 +344,13 @@ export default function AdminCategories() {
             <tbody className="text-sm">
               {loading ? (
                 <tr>
-                  <td colSpan="4" className="p-8 text-center uppercase tracking-widest font-bold animate-pulse">
+                  <td colSpan="3" className="p-8 text-center uppercase tracking-widest font-bold animate-pulse">
                     Loading categories...
                   </td>
                 </tr>
               ) : categories.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="p-8 text-center uppercase tracking-widest font-bold">
+                  <td colSpan="3" className="p-8 text-center uppercase tracking-widest font-bold">
                     No categories found.
                   </td>
                 </tr>
@@ -348,15 +360,17 @@ export default function AdminCategories() {
                   const catId = category.id || category.ID || category.Id || "N/A";
                   return (
                     <tr key={catId} className="border-b border-soxenly-beige hover:bg-neutral-100 transition-colors">
-                      <td className="p-4 text-sm text-neutral-600">{catId}</td>
-                      <td className="p-4 border-l border-soxenly-beige text-sm text-neutral-600">{catName}</td>
+                      <td className="p-4 text-sm text-neutral-600">{catName}</td>
                       <td className="p-4 border-l border-soxenly-beige">
-                        <div className="w-16 h-16 border border-soxenly-beige bg-neutral-100 overflow-hidden">
+                        <div 
+                          className="w-16 h-16 border border-soxenly-beige bg-neutral-100 overflow-hidden cursor-zoom-in group"
+                          onClick={() => setZoomImage(category.image.startsWith("http") ? category.image : `${import.meta.env.VITE_API_BASE_URL}${category.image}`)}
+                        >
                           {category.image ? (
                             <img 
-                              src={`${import.meta.env.VITE_API_BASE_URL}${category.image}`} 
+                              src={category.image.startsWith("http") ? category.image : `${import.meta.env.VITE_API_BASE_URL}${category.image}`} 
                               alt={catName}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-[10px] text-neutral-400 font-display">

@@ -247,20 +247,32 @@ export default function AdminOrders() {
           <h2 className="text-sm font-medium tracking-[0.2em] text-neutral-500 mb-1">Fulfillment</h2>
           <h1 className="font-serif text-4xl lg:text-5xl text-soxenly-green">Orders</h1>
         </div>
-        <div className="flex space-x-2">
-          <button 
-            disabled={page === 1}
-            onClick={() => setPage(p => p - 1)}
-            className="px-4 py-2 bg-white border border-soxenly-beige font-medium text-sm text-xs hover:bg-soxenly-green hover:text-soxenly-cream disabled:opacity-50"
-          >
-            Prev
-          </button>
-          <button 
-            onClick={() => setPage(p => p + 1)}
-            className="px-4 py-2 bg-white border border-soxenly-beige font-medium text-sm text-xs hover:bg-soxenly-green hover:text-soxenly-cream"
-          >
-            Next
-          </button>
+        <div className="flex items-center gap-3">
+          <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 bg-neutral-50 px-4 py-2 rounded-full border border-neutral-100">
+            Page {page}
+          </div>
+          <div className="flex bg-white rounded-full border border-soxenly-beige p-1 shadow-sm">
+            <button 
+              disabled={page === 1}
+              onClick={() => setPage(p => p - 1)}
+              className="p-2 rounded-full hover:bg-soxenly-green hover:text-soxenly-cream transition-all duration-300 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit"
+              title="Previous Page"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path>
+              </svg>
+            </button>
+            <button 
+              onClick={() => setPage(p => p + 1)}
+              disabled={orders.length < 10}
+              className="p-2 rounded-full hover:bg-soxenly-green hover:text-soxenly-cream transition-all duration-300 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit"
+              title="Next Page"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
+              </svg>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -277,7 +289,7 @@ export default function AdminOrders() {
             <thead>
               <tr className="bg-soxenly-green text-soxenly-cream text-xs uppercase tracking-[0.1em]">
                 <th className="p-4 border-b border-soxenly-beige">Order ID</th>
-                <th className="p-4 border-b border-soxenly-beige border-l border-white">User ID</th>
+                <th className="p-4 border-b border-soxenly-beige border-l border-white">Customer Email</th>
                 <th className="p-4 border-b border-soxenly-beige border-l border-white text-center">Size</th>
                 <th className="p-4 border-b border-soxenly-beige border-l border-white text-center">Qty</th>
                 <th className="p-4 border-b border-soxenly-beige border-l border-white">Amount</th>
@@ -303,7 +315,7 @@ export default function AdminOrders() {
                 orders.map((order) => (
                   <tr key={order.order_id || order.Id} className="border-b border-soxenly-beige hover:bg-neutral-100 transition-colors">
                     <td className="p-4 text-sm text-neutral-600">#{order.order_id || order.Id}</td>
-                    <td className="p-4 border-l border-soxenly-beige text-sm text-neutral-600">{order.user_id || order.UserId}</td>
+                    <td className="p-4 border-l border-soxenly-beige text-sm text-neutral-600">{order.email || order.Email || 'N/A'}</td>
                     <td className="p-4 border-l border-soxenly-beige text-center font-display font-bold">{order.size || 'N/A'}</td>
                     <td className="p-4 border-l border-soxenly-beige text-center">
                       <span className="bg-neutral-100 px-2 py-1 rounded text-xs font-bold border border-neutral-200">

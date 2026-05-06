@@ -116,7 +116,7 @@ const AdminBanners = () => {
           <div key={banner.id} className="border border-soxenly-beige bg-white flex flex-col group transition-transform hover:-translate-y-1">
             <div className="aspect-video bg-neutral-100 border-b border-soxenly-beige relative overflow-hidden">
               <img 
-                src={`${import.meta.env.VITE_API_BASE_URL}${banner.image}`} 
+                src={banner.image.startsWith("http") ? banner.image : `${import.meta.env.VITE_API_BASE_URL}${banner.image}`} 
                 alt={banner.title1} 
                 className="w-full h-full object-cover"
               />

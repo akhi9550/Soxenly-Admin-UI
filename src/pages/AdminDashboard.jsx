@@ -97,17 +97,17 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-soxenly-beige pb-6">
-        <div>
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-400">System Intelligence</span>
-          <h1 className="font-serif text-5xl text-soxenly-green mt-1">Performance Overview</h1>
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-soxenly-beige pb-6">
+        <div className="w-full md:w-auto break-words">
+          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-400 block mb-2">System Intelligence</span>
+          <h1 className="font-serif text-4xl md:text-5xl text-soxenly-green mt-1 leading-tight">Performance Overview</h1>
         </div>
-        <div className="flex items-center gap-4 bg-white px-6 py-3 rounded-2xl border border-soxenly-beige shadow-sm">
-          <div className="text-right">
+        <div className="w-full md:w-auto flex items-center justify-between md:justify-start gap-4 bg-white px-4 md:px-6 py-3 rounded-2xl border border-soxenly-beige shadow-sm">
+          <div className="text-left md:text-right">
             <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Current Session</p>
             <p className="text-xs font-bold text-soxenly-green">Active Node: Admin Cluster</p>
           </div>
-          <div className="w-10 h-10 bg-soxenly-green rounded-xl flex items-center justify-center text-white">
+          <div className="w-10 h-10 bg-soxenly-green rounded-xl flex items-center justify-center text-white shrink-0">
             <TrendingUp size={20} />
           </div>
         </div>
@@ -210,7 +210,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </div>
-            <div className="flex gap-1 bg-neutral-50 p-1.5 rounded-2xl border border-neutral-100">
+            <div className="flex flex-wrap justify-center sm:justify-start gap-1 bg-neutral-50 p-1.5 rounded-2xl border border-neutral-100 w-full sm:w-auto">
               {[
                 { id: 'hourly', label: 'Hourly' },
                 { id: 'daily', label: 'Daily' },
@@ -220,9 +220,9 @@ export default function AdminDashboard() {
                 <button 
                   key={btn.id}
                   onClick={() => setTimeframe(btn.id)}
-                  className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${
+                  className={`px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex-1 sm:flex-none text-center ${
                     timeframe === btn.id 
-                      ? "bg-soxenly-green text-white shadow-lg shadow-soxenly-green/20 scale-105" 
+                      ? "bg-soxenly-green text-white shadow-lg shadow-soxenly-green/20 scale-100 md:scale-105" 
                       : "text-neutral-400 hover:text-soxenly-green hover:bg-white"
                   }`}
                 >
